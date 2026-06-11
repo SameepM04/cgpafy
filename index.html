@@ -1,0 +1,1907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CGPA Calculator - First Year</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&family=Cinzel:wght@700;900&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════════
+   ROOT & RESET
+═══════════════════════════════════════════════ */
+:root {
+  --deep:        #03080f;
+  --surface:     #060f1c;
+  --card:        #071320;
+  --card2:       #081626;
+  --c1:          #00e5ff;   /* primary cyan */
+  --c1d:         #009ab3;
+  --c1g:         rgba(0,229,255,.18);
+  --c2:          #f0c040;   /* gold accent */
+  --c2d:         #a07c18;
+  --c2g:         rgba(240,192,64,.16);
+  --c3:          #7c3aed;   /* violet */
+  --c3g:         rgba(124,58,237,.18);
+  --green:       #00ff9d;
+  --red:         #ff2d55;
+  --redg:        rgba(255,45,85,.15);
+  --border:      rgba(0,229,255,.12);
+  --border2:     rgba(0,229,255,.28);
+  --text:        #cce8f4;
+  --text2:       #527a99;
+  --text3:       #8ab4cc;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--deep);
+  color: var(--text);
+  font-family: 'Exo 2', sans-serif;
+  font-size: 15px;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ── Animated background ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 0%,   rgba(0,229,255,.06)  0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 90% 100%,  rgba(124,58,237,.07) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 50% 50%,   rgba(0,229,255,.03)  0%, transparent 60%);
+}
+/* Grid lines */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0,229,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* ── Particles canvas sits behind everything ── */
+#bg-canvas {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .5;
+}
+
+/* ══ WRAPPER ══ */
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+/* ════════════════════════════════════════
+   HEADER
+════════════════════════════════════════ */
+header {
+  text-align: center;
+  padding: 56px 0 48px;
+}
+.hdr-eyebrow {
+  display: inline-flex;
+  align-items: center; gap: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: 4px;
+  color: var(--c1d);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.hdr-eyebrow::before, .hdr-eyebrow::after {
+  content: ''; display: block;
+  width: 36px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--c1d));
+}
+.hdr-eyebrow::after { background: linear-gradient(90deg, var(--c1d), transparent); }
+
+h1 {
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: clamp(28px, 5.5vw, 58px);
+  line-height: 1.08;
+  letter-spacing: 1px;
+  background: linear-gradient(135deg, var(--c1) 0%, #fff 45%, var(--c2) 80%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 28px rgba(0,229,255,.35));
+  margin-bottom: 10px;
+}
+.hdr-sub-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  text-align: center;
+}
+.hdr-sub {
+  width: 100%;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 7px;
+  color: var(--text2);
+  text-transform: uppercase;
+}
+.hdr-pict {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 5px;
+  color: var(--c2);
+  text-transform: uppercase;
+  padding: 3px 12px 3px 10px;
+  border: 1px solid rgba(240,192,64,.35);
+  border-radius: 5px;
+  background: rgba(240,192,64,.07);
+  box-shadow: 0 0 12px rgba(240,192,64,.15);
+  flex-shrink: 0;
+}
+.hdr-rule {
+  display: flex; align-items: center; gap: 16px;
+  margin: 28px auto 0; max-width: 600px;
+}
+.hdr-rule-line {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--c1), var(--c2), var(--c1), transparent);
+  opacity: .5; animation: rulePulse 3s ease-in-out infinite;
+}
+.hdr-rule-diamond {
+  width: 8px; height: 8px;
+  background: var(--c1);
+  transform: rotate(45deg);
+  box-shadow: 0 0 10px var(--c1);
+}
+@keyframes rulePulse { 0%,100%{opacity:.3} 50%{opacity:.9} }
+
+/* ════════════════════════════════════════
+   CARDS
+════════════════════════════════════════ */
+.card{
+  width:100%;
+  background:linear-gradient(
+      145deg,
+      var(--card),
+      var(--card2)
+  );
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:32px 36px;
+  margin:0 0 24px 0;
+  position:relative;
+  overflow:hidden;
+  transition:
+      border-color .35s,
+      box-shadow .35s;
+  box-sizing:border-box;
+}
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--c1) 40%, var(--c2) 60%, transparent 100%);
+  opacity: .5;
+}
+.card:hover {
+  border-color: rgba(0,229,255,.28);
+  box-shadow: 0 8px 50px rgba(0,229,255,.09), 0 2px 16px rgba(0,0,0,.5);
+}
+.card-corner {
+  position: absolute;
+  width: 20px; height: 20px;
+  border-color: var(--c1);
+  border-style: solid;
+  opacity: .35;
+}
+.card-corner.tl { top: 10px; left: 10px; border-width: 1px 0 0 1px; }
+.card-corner.tr { top: 10px; right: 10px; border-width: 1px 1px 0 0; }
+.card-corner.bl { bottom: 10px; left: 10px; border-width: 0 0 1px 1px; }
+.card-corner.br { bottom: 10px; right: 10px; border-width: 0 1px 1px 0; }
+
+/* ════════════════════════════════════════
+   SECTION TITLES
+════════════════════════════════════════ */
+.sec-title {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 28px;
+}
+.sec-title-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, rgba(0,229,255,.14), rgba(0,229,255,.04));
+  border: 1px solid rgba(0,229,255,.3);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.sec-title-text {
+  font-family: 'Cinzel', serif;
+  font-size: 14px; font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--c1);
+}
+.sec-title-line {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, rgba(0,229,255,.25), transparent);
+}
+
+/* ════════════════════════════════════════
+   IDENTITY FIELDS
+════════════════════════════════════════ */
+.identity-grid {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr 1fr;
+  gap: 20px;
+}
+@media(max-width:700px) { .identity-grid{grid-template-columns:1fr;} }
+
+.field {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.field-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--c1d);
+}
+
+input[type=text], input[type=number] {
+  background: rgba(0,229,255,.03);
+  border: 1px solid rgba(0,229,255,.18);
+  border-radius: 10px;
+  padding: 13px 18px;
+  color: var(--text);
+  font-family: 'Exo 2', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  width: 100%;
+  outline: none;
+  transition: border-color .25s, box-shadow .25s, background .25s;
+  caret-color: var(--c1);
+}
+input::placeholder { color: var(--text2); font-weight: 400; }
+input:hover {
+  border-color: rgba(0,229,255,.38);
+  box-shadow: 0 0 0 3px rgba(0,229,255,.06), inset 0 0 12px rgba(0,229,255,.04);
+}
+input:focus {
+  border-color: var(--c1);
+  background: rgba(0,229,255,.05);
+  box-shadow: 0 0 0 4px rgba(0,229,255,.1), 0 0 24px rgba(0,229,255,.2), inset 0 0 16px rgba(0,229,255,.05);
+}
+input.err {
+  border-color: var(--red) !important;
+  box-shadow: 0 0 0 3px rgba(255,45,85,.14) !important;
+}
+input[type=number]::-webkit-inner-spin-button { opacity: .25; }
+
+/* ════════════════════════════════════════
+   GROUP-LOCKED / REVEAL STATES
+════════════════════════════════════════ */
+#marks-card, .calc-btn-wrap {
+  width: 100%;
+  max-width: 100%;
+  display: none;                    /* hidden until group is set */
+}
+#marks-card.revealed, .calc-btn-wrap.revealed {
+  display: block;
+  animation: slideReveal .45s cubic-bezier(.22,.68,0,1.2) both;
+}
+@keyframes slideReveal {
+  from { opacity: 0; transform: translateY(18px) scale(.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Group-confirm banner that appears inside identity card */
+.grp-badge {
+  display: inline-flex; align-items: center; gap: 10px;
+  margin-top: 18px;
+  padding: 11px 20px;
+  background: linear-gradient(135deg, rgba(0,229,255,.09), rgba(0,229,255,.03));
+  border: 1px solid rgba(0,229,255,.28);
+  border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; letter-spacing: 2px;
+  color: var(--c1);
+  animation: fadeIn .35s ease;
+}
+.grp-badge .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  flex-shrink: 0;
+  animation: dotPulse 2s ease-in-out infinite;
+}
+@keyframes dotPulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* Awaiting prompt shown inside marks area before group set */
+.await-prompt {
+  text-align: center;
+  padding: 40px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; letter-spacing: 3px;
+  color: var(--text2);
+  text-transform: uppercase;
+}
+.await-prompt .ap-icon {
+  font-size: 32px; display: block; margin-bottom: 14px;
+  animation: floatIcon 3s ease-in-out infinite;
+}
+@keyframes floatIcon { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+
+/* ════════════════════════════════════════
+   SEMESTER TABS
+════════════════════════════════════════ */
+.sem-nav {
+  display: flex; gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+  margin-bottom: 28px;
+}
+.sem-btn {
+  flex: 1; padding: 15px 20px;
+  background: var(--card2);
+  border: none; cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text2);
+  transition: all .3s;
+  position: relative;
+}
+.sem-btn.active {
+  background: linear-gradient(135deg, rgba(0,229,255,.13), rgba(0,229,255,.05));
+  color: var(--c1);
+}
+.sem-btn.active::after {
+  content: '';
+  position: absolute; bottom: 0; left: 20%; right: 20%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--c1), transparent);
+  border-radius: 2px;
+}
+.sem-btn:hover:not(.active) { background: rgba(0,229,255,.05); color: var(--text3); }
+.sem-btn:first-child { border-right: 1px solid var(--border); }
+
+.sem-panel { display: none; animation: fadeIn .3s ease; }
+.sem-panel.active { display: block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+/* ════════════════════════════════════════
+   SUBJECT GRID
+════════════════════════════════════════ */
+.subj-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media(max-width:750px) { .subj-grid{grid-template-columns:1fr;} }
+
+.subj-card {
+  background: linear-gradient(135deg, rgba(0,229,255,.04), rgba(6,15,28,.9));
+  border: 1px solid rgba(0,229,255,.1);
+  border-radius: 12px;
+  padding: 16px 18px;
+  transition: border-color .25s, transform .25s, box-shadow .25s;
+}
+.subj-card:hover {
+  border-color: rgba(0,229,255,.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(0,229,255,.09);
+}
+.subj-card.failed-card {
+  border-color: rgba(255,45,85,.35) !important;
+  background: linear-gradient(135deg, rgba(255,45,85,.06), rgba(6,15,28,.9));
+}
+
+.subj-top {
+  display: flex; align-items: flex-start; gap: 10px; margin-bottom: 13px;
+}
+.subj-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  padding: 3px 8px;
+  background: rgba(0,229,255,.1);
+  color: var(--c1);
+  border: 1px solid rgba(0,229,255,.22);
+  border-radius: 5px;
+  letter-spacing: 1px;
+  flex-shrink: 0; margin-top: 1px;
+}
+.subj-name {
+  font-size: 13px; font-weight: 600;
+  color: var(--text); line-height: 1.35;
+  flex: 1;
+}
+.subj-cr {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 7px;
+  background: rgba(240,192,64,.08);
+  color: var(--c2d);
+  border: 1px solid rgba(240,192,64,.18);
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.marks-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.mf { flex: 1; min-width: 85px; display: flex; flex-direction: column; gap: 6px; }
+
+/* coloured badge labels */
+.mb {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 1px;
+  padding: 2px 8px; border-radius: 4px;
+  text-transform: uppercase;
+}
+.mb-100 { background: rgba(0,229,255,.1);  color: var(--c1);  border: 1px solid rgba(0,229,255,.22); }
+.mb-25  { background: rgba(240,192,64,.1); color: var(--c2);  border: 1px solid rgba(240,192,64,.22); }
+.mb-50  { background: rgba(124,58,237,.12);color: #a78bfa;     border: 1px solid rgba(124,58,237,.28); }
+.mb-5   { background: rgba(255,45,85,.1);  color: #ff6b85;    border: 1px solid rgba(255,45,85,.25); }
+.mb-15  { background: rgba(255,160,30,.1); color: #ffa01e;    border: 1px solid rgba(255,160,30,.25); }
+.mb-20  { background: rgba(0,255,157,.1);  color: var(--green); border: 1px solid rgba(0,255,157,.25); }
+.mb-60  { background: rgba(0,229,255,.1);  color: var(--c1);  border: 1px solid rgba(0,229,255,.22); }
+
+/* Glow varieties on hover/focus for each input type */
+.mf-100 input:hover {
+  border-color: rgba(0,229,255,.55);
+  box-shadow: 0 0 0 3px rgba(0,229,255,.08), 0 0 20px rgba(0,229,255,.18), inset 0 0 10px rgba(0,229,255,.05);
+}
+.mf-100 input:focus {
+  border-color: var(--c1);
+  box-shadow: 0 0 0 4px rgba(0,229,255,.14), 0 0 36px rgba(0,229,255,.3), inset 0 0 18px rgba(0,229,255,.07);
+}
+.mf-60 input:hover  { border-color: rgba(0,229,255,.55); box-shadow: 0 0 0 3px rgba(0,229,255,.08), 0 0 20px rgba(0,229,255,.18), inset 0 0 10px rgba(0,229,255,.05); }
+.mf-60 input:focus  { border-color: var(--c1); box-shadow: 0 0 0 4px rgba(0,229,255,.14), 0 0 36px rgba(0,229,255,.3), inset 0 0 18px rgba(0,229,255,.07); }
+.mf-25 input:hover {
+  border-color: rgba(240,192,64,.55);
+  box-shadow: 0 0 0 3px rgba(240,192,64,.08), 0 0 20px rgba(240,192,64,.2), inset 0 0 10px rgba(240,192,64,.05);
+}
+.mf-25 input:focus {
+  border-color: var(--c2);
+  box-shadow: 0 0 0 4px rgba(240,192,64,.14), 0 0 36px rgba(240,192,64,.3), inset 0 0 18px rgba(240,192,64,.07);
+}
+.mf-20 input:hover  { border-color: rgba(0,255,157,.55);  box-shadow: 0 0 0 3px rgba(0,255,157,.08),  0 0 20px rgba(0,255,157,.2),  inset 0 0 10px rgba(0,255,157,.05); }
+.mf-20 input:focus  { border-color: var(--green); box-shadow: 0 0 0 4px rgba(0,255,157,.14), 0 0 36px rgba(0,255,157,.3), inset 0 0 18px rgba(0,255,157,.07); }
+.mf-15 input:hover  { border-color: rgba(255,160,30,.55); box-shadow: 0 0 0 3px rgba(255,160,30,.08), 0 0 20px rgba(255,160,30,.2), inset 0 0 10px rgba(255,160,30,.05); }
+.mf-15 input:focus  { border-color: #ffa01e; box-shadow: 0 0 0 4px rgba(255,160,30,.14), 0 0 36px rgba(255,160,30,.3), inset 0 0 18px rgba(255,160,30,.07); }
+.mf-5 input:hover   { border-color: rgba(255,45,85,.55);  box-shadow: 0 0 0 3px rgba(255,45,85,.08),  0 0 20px rgba(255,45,85,.2),  inset 0 0 10px rgba(255,45,85,.05); }
+.mf-5 input:focus   { border-color: var(--red); box-shadow: 0 0 0 4px rgba(255,45,85,.14), 0 0 36px rgba(255,45,85,.3), inset 0 0 18px rgba(255,45,85,.07); }
+.mf-50 input:hover {
+  border-color: rgba(124,58,237,.55);
+  box-shadow: 0 0 0 3px rgba(124,58,237,.08), 0 0 20px rgba(124,58,237,.2), inset 0 0 10px rgba(124,58,237,.05);
+}
+.mf-50 input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 4px rgba(124,58,237,.14), 0 0 36px rgba(124,58,237,.3), inset 0 0 18px rgba(124,58,237,.07);
+}
+
+/* ════════════════════════════════════════
+   CALCULATE BUTTON
+════════════════════════════════════════ */
+.calc-btn-wrap { margin-top: 8px; }
+.calc-btn {
+  width: 100%; padding: 20px;
+  background: linear-gradient(135deg, rgba(0,229,255,.1), rgba(0,229,255,.04));
+  border: 1px solid var(--c1);
+  border-radius: 12px;
+  color: var(--c1);
+  font-family: 'Cinzel', serif;
+  font-size: 14px; font-weight: 700;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative; overflow: hidden;
+  transition: all .3s;
+}
+.calc-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(0,229,255,.18), rgba(240,192,64,.08));
+  opacity: 0; transition: opacity .3s;
+}
+.calc-btn:hover {
+  color: #fff;
+  box-shadow: 0 0 40px rgba(0,229,255,.35), 0 0 80px rgba(0,229,255,.12), 0 4px 20px rgba(0,0,0,.4);
+  transform: translateY(-2px);
+}
+.calc-btn:hover::before { opacity: 1; }
+.calc-btn:active { transform: none; }
+.calc-btn span { position: relative; z-index: 1; }
+.calc-btn-icon { margin-right: 10px; font-size: 16px; }
+
+/* ════════════════════════════════════════
+   STATUS MESSAGE
+════════════════════════════════════════ */
+.status {
+  display: none;
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; letter-spacing: 1px;
+  margin-top: 18px;
+  line-height: 1.6;
+}
+.status.error {
+  display: block;
+  background: var(--redg);
+  border: 1px solid rgba(255,45,85,.35);
+  color: #ff6b85;
+  box-shadow: 0 0 24px rgba(255,45,85,.1);
+}
+.status.success {
+  display: block;
+  background: rgba(0,255,157,.06);
+  border: 1px solid rgba(0,255,157,.28);
+  color: var(--green);
+  box-shadow: 0 0 24px rgba(0,255,157,.08);
+}
+.status.info {
+  display: block;
+  background: rgba(0,229,255,.05);
+  border: 1px solid rgba(0,229,255,.22);
+  color: var(--c1d);
+}
+/* Grading Policy System */
+.grading-container{
+  width:100%;
+  max-width:none;
+  margin:24px 0;
+  background:linear-gradient(145deg,var(--card),var(--card2));
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:32px 36px;
+  position:relative;
+  overflow:hidden;
+}
+.grading-table-card {
+  background: linear-gradient(145deg, var(--card), var(--card2));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  margin-bottom: 20px;
+}
+.grading-table-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--c1) 40%, var(--c2) 60%, transparent 100%);
+  opacity: .5;
+}
+.policy-table-wrapper { overflow-x: auto; }
+.policy-table { width: 100%; border-collapse: collapse; font-family: 'Exo 2', sans-serif; text-align: center; }
+.policy-table th {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--c1); padding: 14px 10px; border-bottom: 2px solid var(--border2);
+  background: rgba(0, 229, 255, 0.03);
+}
+.policy-table td { padding: 12px 10px; border-bottom: 1px solid rgba(0, 229, 255, 0.06); color: var(--text3); font-size: 14px; font-weight: 500; }
+.policy-table tr:hover td { background: rgba(0, 229, 255, 0.02); }
+.policy-table tr:last-child td { border-bottom: none; }
+.gp-bold { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #fff; font-size: 15px; }
+
+.platform-notice-card {
+  background: rgba(6, 15, 28, 0.85);
+  border: 1px solid rgba(240, 192, 64, 0.2);
+  border-left: 4px solid var(--c2);
+  border-radius: 6px 12px 12px 6px;
+  padding: 16px 20px;
+  font-family: 'Exo 2', sans-serif;
+  font-size: 13.5px; line-height: 1.6; color: var(--text);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.platform-notice-card strong { color: var(--c2); font-weight: 600; }
+
+/* ════════════════════════════════════════
+   RESULTS SECTION
+════════════════════════════════════════ */
+#results-section { display: none; margin-top: 32px; animation: fadeIn .5s ease; }
+
+.results-trio{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+  justify-content:center;
+}
+
+.results-trio.single{
+  grid-template-columns:minmax(350px,450px);
+  justify-content:center;
+}
+@media(max-width:680px) { .results-trio{grid-template-columns:1fr;} }
+
+.res-box {
+  position: relative; overflow: hidden;
+  background: linear-gradient(145deg, var(--card), var(--card2));
+  border: 1px solid rgba(0,229,255,.22);
+  border-radius: 16px;
+  padding: 32px 20px 28px;
+  text-align: center;
+  transition: box-shadow .4s, border-color .4s;
+}
+.res-box::before {
+  content: '';
+  position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--c1), transparent);
+}
+/* Sweep animation */
+.res-box::after {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: conic-gradient(from 0deg, transparent 75%, rgba(0,229,255,.04) 85%, transparent 95%);
+  animation: sweep 7s linear infinite;
+}
+@keyframes sweep { to { transform: rotate(360deg); } }
+
+.res-box.gold-box { border-color: rgba(240,192,64,.28); }
+.res-box.gold-box::before { background: linear-gradient(90deg, transparent, var(--c2), transparent); }
+.res-box.gold-box::after {
+  background: conic-gradient(from 0deg, transparent 75%, rgba(240,192,64,.05) 85%, transparent 95%);
+}
+
+.res-inner { position: relative; z-index: 1; }
+
+.res-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: 14px;
+  line-height: 1.8;
+}
+.res-value {
+  font-family: 'Cinzel', serif;
+  font-size: 52px; font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--c1), #fff 50%, var(--c1d));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: valGlow 2.5s ease-in-out infinite alternate;
+}
+.res-box.gold-box .res-value {
+  background: linear-gradient(135deg, var(--c2), #fff 50%, var(--c2d));
+  -webkit-background-clip: text; background-clip: text;
+  animation: valGlowGold 2.5s ease-in-out infinite alternate;
+}
+@keyframes valGlow {
+  from { filter: drop-shadow(0 0 8px rgba(0,229,255,.5)); }
+  to   { filter: drop-shadow(0 0 22px rgba(0,229,255,.9)); }
+}
+@keyframes valGlowGold {
+  from { filter: drop-shadow(0 0 8px rgba(240,192,64,.5)); }
+  to   { filter: drop-shadow(0 0 22px rgba(240,192,64,.9)); }
+}
+.res-glow-ring {
+  position: absolute; inset: 0; border-radius: 16px; pointer-events: none;
+  box-shadow: inset 0 0 30px rgba(0,229,255,.06), 0 0 50px rgba(0,229,255,.12);
+}
+.res-box.gold-box .res-glow-ring {
+  box-shadow: inset 0 0 30px rgba(240,192,64,.06), 0 0 60px rgba(240,192,64,.18);
+}
+
+/* fail overlay on result box */
+.res-box.fail-box {
+  border-color: rgba(255,45,85,.3) !important;
+}
+.res-box.fail-box .res-value {
+  background: linear-gradient(135deg, var(--red), #ff8080);
+  -webkit-background-clip: text; background-clip: text;
+  animation: none;
+  filter: drop-shadow(0 0 12px rgba(255,45,85,.6));
+}
+.res-box.fail-box::before {
+  background: linear-gradient(90deg, transparent, var(--red), transparent);
+}
+.res-box.fail-box .res-glow-ring {
+  box-shadow: inset 0 0 30px rgba(255,45,85,.06), 0 0 40px rgba(255,45,85,.14);
+}
+
+/* ── Grade breakdown table ── */
+.grade-table-wrap { overflow-x: auto; }
+.grade-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px;
+}
+.grade-table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--c1d);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+.grade-table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid rgba(0,229,255,.05);
+  color: var(--text3);
+  font-weight: 500;
+  vertical-align: middle;
+}
+.grade-table tr:hover td { background: rgba(0,229,255,.03); }
+.grade-table tr:last-child td { border-bottom: none; }
+.code-cell {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--c1d);
+}
+.grade-pill {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 700;
+  padding: 2px 10px; border-radius: 20px;
+  letter-spacing: 1px;
+}
+.g-O  { background:rgba(255,255,255,.1); color:#fff; border:1px solid rgba(255,255,255,.25); }
+.g-Ap { background:rgba(0,255,157,.1);   color:#00ff9d; border:1px solid rgba(0,255,157,.28); }
+.g-A  { background:rgba(0,229,255,.1);   color:var(--c1); border:1px solid rgba(0,229,255,.28); }
+.g-Bp { background:rgba(240,192,64,.1);  color:var(--c2); border:1px solid rgba(240,192,64,.28); }
+.g-B  { background:rgba(255,160,30,.1);  color:#ffa01e; border:1px solid rgba(255,160,30,.28); }
+.g-C { background:rgba(255,100,50,.1);  color:#ff6432; border:1px solid rgba(255,100,50,.28); }
+.g-P  { background:rgba(255,80,80,.1);   color:#ff5050; border:1px solid rgba(255,80,80,.28); }
+.g-F  { background:var(--redg);          color:var(--red); border:1px solid rgba(255,45,85,.35); }
+
+/* gp highlight */
+.gp-cell { font-family:'JetBrains Mono',monospace; font-weight:700; }
+
+/* ── Save button ── */
+.save-wrap { text-align: center; margin-top: 28px; }
+.save-btn {
+  padding: 15px 48px;
+  background: linear-gradient(135deg, rgba(240,192,64,.1), rgba(240,192,64,.04));
+  border: 1px solid var(--c2);
+  border-radius: 10px;
+  color: var(--c2);
+  font-family: 'Cinzel', serif;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 4px;
+  cursor: pointer;
+  transition: all .3s;
+}
+.save-btn:hover {
+  color: #fff;
+  box-shadow: 0 0 32px rgba(240,192,64,.35), 0 0 64px rgba(240,192,64,.12);
+  transform: translateY(-2px);
+}
+.save-btn:active { transform: none; }
+
+/* ════════════════════════════════════════
+   SEMESTER-WISE REPORT BOXES
+════════════════════════════════════════ */
+.report-meta {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.meta-box {
+  background: rgba(0,229,255,.045);
+  border: 1px solid rgba(0,229,255,.18);
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+.meta-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--c1d);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.meta-value {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+.sem-result-box {
+  margin-top: 30px;
+  padding: 24px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #071320, #081626);
+  border: 1px solid rgba(0,229,255,.18);
+  box-shadow: 0 0 50px rgba(0,229,255,.06);
+}
+.sem-head {
+  margin-bottom: 18px;
+  color: var(--c1);
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  text-align: center;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+@media(max-width:680px) {
+  .report-meta { grid-template-columns: 1fr; }
+}
+
+/* ====================
+   GET PDF DOCUMENT
+==================== */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0.4cm;
+  }
+  
+  /* Hide unnecessary items from screen */
+  body > *:not(.wrap),
+  header,
+  #bg-canvas,
+  #card-identity,
+  #grp-banner,
+  .grading-container,
+  .grading-table-card,
+  .platform-notice-card,
+  #identity-card .sec-title,
+  #marks-card,
+  #calc-controls-wrap,
+  .calc-btn-wrap,
+  #calc-option-select,
+  .calc-card,
+  #statusMsg,
+  .save-wrap,
+  footer,
+  .sec-title-icon,
+  .sec-title-line {
+    display: none !important;
+  }
+
+  body {
+    background: #03080f !important;
+    color: #cce8f4 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 100vh !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .wrap {
+    max-width: 100% !important;
+    width: 95% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+  }
+
+  /* Target elements container layout alignment */
+  #identity-card {
+    border: 1px solid rgba(0,229,255,.28) !important;
+    background: #071320 !important;
+    margin-bottom: 12px !important;
+    padding: 16px !important;
+    border-radius: 12px !important;
+  }
+  
+  .identity-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  /* Make sure form elements reflect readable clean values */
+  input[type=text], input[type=number] {
+    background: transparent !important;
+    border: none !important;
+    padding: 4px 0 !important;
+    color: #fff !important;
+    font-size: 14px !important;
+  }
+
+  #results-section{
+    display:flex !important;
+    justify-content:center !important;
+    align-items:center !important;
+    flex-direction:column !important;
+    opacity:1 !important;
+    transform:none !important;
+  }
+
+  #results-section .card {
+    background: #071320 !important;
+    border: 1px solid rgba(0,229,255,.28) !important;
+    padding: 16px !important;
+    margin: 0 !important;
+    border-radius: 12px !important;
+  }
+
+  .results-trio{
+    display:grid !important;
+    grid-template-columns:
+    repeat(3,1fr) !important;
+    gap:12px !important;
+    margin-bottom:12px !important;
+    justify-content:center !important;
+  }
+
+  .results-trio.single{
+    grid-template-columns:
+    minmax(
+      320px,
+      420px
+    ) !important;
+    justify-content:center !important;
+    place-content:center !important;
+  }
+  
+  .results-trio.single .res-box{
+     margin:auto !important;
+      width:100% !important;
+  }
+
+  .res-box {
+    background: #081626 !important;
+    border: 1px solid rgba(0,229,255,.2) !important;
+    padding: 12px !important;
+    text-align: center !important;
+  }
+  
+  .res-value {
+    font-size: 32px !important;
+    color: #00e5ff !important;
+    -webkit-text-fill-color: initial !important;
+  }
+
+  .sem-result-box {
+    background: #060f1c !important;
+    border: 1px solid rgba(0,229,255,.12) !important;
+    margin-top: 10px !important;
+    padding: 12px !important;
+    border-radius: 8px !important;
+  }
+
+  .grade-table th {
+    background: rgba(0, 229, 255, 0.05) !important;
+    color: #00e5ff !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+
+  /* ════════════════════════════════════════
+   GRADING POLICY TABLE
+  ════════════════════════════════════════ */
+  
+
+  .card,
+  .res-box,
+  .sem-result-box,
+  .meta-box {
+    background: #071320 !important;
+    color: var(--text) !important;
+    border-color: rgba(0,229,255,.28) !important;
+    box-shadow: none !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+/* ════════════════════════════════════════
+   FOOTER
+════════════════════════════════════════ */
+footer {
+  text-align: center;
+  padding: 40px 0 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 3px;
+  color: rgba(82,122,153,.5);
+  text-transform: uppercase;
+}
+footer em { color: var(--c1d); font-style: normal; }
+
+/* ═══════ SCROLLBAR ═══════ */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--deep); }
+::-webkit-scrollbar-thumb { background: rgba(0,229,255,.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,229,255,.4); }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div class="wrap">
+
+<!-- ══════════ HEADER ══════════ -->
+<header>
+  <div class="hdr-eyebrow">Academic Performance System</div>
+  <h1>SGPA &amp; CGPA<br>Calculator</h1>
+  <p class="hdr-sub">PICT · First Year Engineering · Semester Grade Analysis</p>
+  <div class="hdr-rule">
+    <div class="hdr-rule-line"></div>
+    <div class="hdr-rule-diamond"></div>
+    <div class="hdr-rule-line"></div>
+  </div>
+</header>
+
+<!-- ══════════ IDENTITY ══════════ -->
+<div class="card" id="card-identity">
+  <div class="card-corner tl"></div><div class="card-corner tr"></div>
+  <div class="card-corner bl"></div><div class="card-corner br"></div>
+  <div class="sec-title">
+    <div class="sec-title-icon">⬡</div>
+    <span class="sec-title-text">Student Identity</span>
+    <div class="sec-title-line"></div>
+  </div>
+  <div class="identity-grid">
+    <div class="field">
+      <label class="field-label">Full Name</label>
+      <input type="text" id="iName" placeholder="e.g. The Dude" autocomplete="off"/>
+    </div>
+    <div class="field">
+      <label class="field-label">Roll Number</label>
+      <input type="text" id="iRoll" placeholder="e.g. 1XXYY" autocomplete="off"/>
+    </div>
+    <div class="field">
+      <label class="field-label">Group No. (1 or 2)</label>
+      <input type="number" id="iGroup" placeholder="1 or 2" min="1" max="2" oninput="onGroupInput(this)"/>
+    </div>
+  </div>
+  <div id="grp-banner"></div>
+</div>
+
+
+<!-- ══════════ GRADING POLICY ══════════ -->
+<div class="grading-container">
+    <div class="sec-title">
+      <div class="sec-title-icon">📊</div>
+      <div class="sec-title-text">Grading System & Criteria</div>
+      <div class="sec-title-line"></div>
+    </div>
+    <div class="grading-table-card">
+      <div class="policy-table-wrapper">
+        <table class="policy-table">
+          <thead>
+            <tr>
+              <th>Percentage Range</th>
+              <th>Letter Grade</th>
+              <th>Grade Points</th>
+              <th>Performance Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>90 &lt; X &lt;= 100</td>
+              <td><span class="grade-pill g-O">O</span></td>
+              <td class="gp-bold">10</td>
+              <td>Outstanding</td>
+            </tr>
+            <tr>
+              <td>80 &lt; X &lt;= 90</td>
+              <td><span class="grade-pill g-Ap">A+</span></td>
+              <td class="gp-bold">9</td>
+              <td>Excellent</td>
+            </tr>
+            <tr>
+              <td>70 &lt; X &lt;= 80</td>
+              <td><span class="grade-pill g-A">A</span></td>
+              <td class="gp-bold">8</td>
+              <td>Very Good</td>
+            </tr>
+            <tr>
+              <td>60 &lt; X &lt;= 70</td>
+              <td><span class="grade-pill g-Bp">B+</span></td>
+              <td class="gp-bold">7</td>
+              <td>Good</td>
+            </tr>
+            <tr>
+              <td>50 &lt; X &lt;= 60</td>
+              <td><span class="grade-pill g-B">B</span></td>
+              <td class="gp-bold">6</td>
+              <td>Above Average</td>
+            </tr>
+            <tr>
+              <td>44 &lt; X &lt;= 50</td>
+              <td><span class="grade-pill g-C">C</span></td>
+              <td class="gp-bold">5</td>
+              <td>Average</td>
+            </tr>
+            <tr>
+              <td>40 &lt;= X &lt;= 44</td>
+              <td><span class="grade-pill g-P">P</span></td>
+              <td class="gp-bold">4</td>
+              <td>Pass</td>
+            </tr>
+            <tr>
+              <td>0 &lt;= X &lt; 40</td>
+              <td><span class="grade-pill g-F">F</span></td>
+              <td class="gp-bold" style="color: var(--red);">0</td>
+              <td style="color: var(--red);">Fail</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Attendance Incentive Table -->
+
+    <div class="grading-table-card"
+      style="margin-top:18px;">
+
+    <div style="
+      color:var(--c2);
+      font-family:'Cinzel';
+      font-size:14px;
+      letter-spacing:3px;
+      margin-bottom:16px;
+    ">
+      ATTENDANCE INCENTIVE MARKS
+    </div>
+
+    <div class="policy-table-wrapper">
+
+      <table class="policy-table">
+
+        <thead>
+          <tr>
+            <th>Percentage Presentee (Y)</th>
+            <th>Marks Awarded</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr>
+            <td>90 &lt; Y &lt;= 100</td>
+            <td class="gp-bold">5 M</td>
+          </tr>
+
+          <tr>
+            <td>85 &lt; Y &lt;= 90</td>
+            <td class="gp-bold">4 M</td>
+          </tr>
+
+          <tr>
+            <td>80 &lt; Y &lt;= 85</td>
+            <td class="gp-bold">3 M</td>
+          </tr>
+
+          <tr>
+            <td>75 &lt;= Y &lt;= 80</td>
+            <td class="gp-bold">2 M</td>
+          </tr>
+
+          <tr>
+            <td>Y &lt; 75</td>
+            <td class="gp-bold"
+              style="color:var(--red)">
+              0 M
+            </td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+      <div style="
+        margin-top:12px;
+        color:var(--text2);
+        font-size:12px;
+      ">
+      Y = Percentage Presentee of Student
+    </div>
+
+    </div>
+
+
+    <!-- Note Box -->
+
+    <div
+      class="platform-notice-card"
+      style="
+      margin-top:18px;
+    ">
+
+    Here
+    <strong>X</strong>
+    is the
+    <strong>performance percentage</strong>.
+
+    For Attendance and CIE marks check
+    <strong>Task Wise Internal Marks on ERP</strong>.
+
+    For ISE marks check
+    <strong>Marksheet on ERP</strong>.
+
+    For ESE marks check
+    <strong>Telegram</strong>.
+
+    </div>
+  </div>
+
+<!-- ══════════ MARKS ENTRY ══════════ -->
+<div class="card" id="marks-card">
+  <div class="card-corner tl"></div><div class="card-corner tr"></div>
+  <div class="card-corner bl"></div><div class="card-corner br"></div>
+  <div class="sec-title">
+    <div class="sec-title-icon">✦</div>
+    <span class="sec-title-text">Subject Marks Entry</span>
+    <div class="sec-title-line"></div>
+  </div>
+
+  <div class="sem-nav">
+    <button class="sem-btn active" onclick="switchSem(1,this)">◈ &nbsp;Semester I</button>
+    <button class="sem-btn" onclick="switchSem(2,this)">◈ &nbsp;Semester II</button>
+  </div>
+
+  <div class="sem-panel active" id="sp1">
+    <div class="subj-grid" id="sg1"></div>
+  </div>
+  <div class="sem-panel" id="sp2">
+    <div class="subj-grid" id="sg2"></div>
+  </div>
+</div>
+
+<!-- ══════════ CALCULATE ══════════ -->
+<div class="calc-btn-wrap" id="calc-controls-wrap">
+  <div class="field" style="margin-bottom: 16px;">
+    <label class="field-label" for="calc-option-select">Choose Calculation Option</label>
+    <select id="calc-option-select" style="background: rgba(0,229,255,.03); border: 1px solid rgba(0,229,255,.18); border-radius: 10px; padding: 13px 18px; color: var(--text); font-family: 'Exo 2', sans-serif; font-size: 15px; font-weight: 600; width: 100%; outline: none; caret-color: var(--c1);">
+      <option value="sem1" style="background: var(--surface); color: var(--text);">Calculate Semester 1 SGPA</option>
+      <option value="sem2" style="background: var(--surface); color: var(--text);">Calculate Semester 2 SGPA</option>
+      <option value="fy_cgpa" style="background: var(--surface); color: var(--text);" selected>Calculate First Year CGPA</option>
+    </select>
+  </div>
+  <button class="calc-btn" onclick="calculate()">
+    <span><strong class="calc-btn-icon">⚡</strong>EXECUTE COMPUTATION</span>
+  </button>
+</div>
+<div class="status" id="statusMsg"></div>
+
+<!-- ══════════ RESULTS ══════════ -->
+<section id="results-section">
+  <div class="card">
+    <div class="card-corner tl"></div><div class="card-corner tr"></div>
+    <div class="card-corner bl"></div><div class="card-corner br"></div>
+    <div class="sec-title">
+      <div class="sec-title-icon">◉</div>
+      <span class="sec-title-text">Academic Results</span>
+      <div class="sec-title-line"></div>
+    </div>
+
+    <div class="report-meta" id="reportMeta">
+      <div class="meta-box">
+        <div class="meta-label">Student Name</div>
+        <div class="meta-value" id="metaName">—</div>
+      </div>
+      <div class="meta-box">
+        <div class="meta-label">Roll Number</div>
+        <div class="meta-value" id="metaRoll">—</div>
+      </div>
+      <div class="meta-box">
+        <div class="meta-label">Group Number</div>
+        <div class="meta-value" id="metaGroup">—</div>
+      </div>
+    </div>
+
+    <!-- 3 result boxes -->
+    <div class="results-trio">
+      <div class="res-box" id="rbox1">
+        <div class="res-glow-ring"></div>
+        <div class="res-inner">
+          <div class="res-label">Semester&nbsp;1<br>SGPA</div>
+          <div class="res-value" id="rv1">—</div>
+        </div>
+      </div>
+      <div class="res-box" id="rbox2">
+        <div class="res-glow-ring"></div>
+        <div class="res-inner">
+          <div class="res-label">Semester&nbsp;2<br>SGPA</div>
+          <div class="res-value" id="rv2">—</div>
+        </div>
+      </div>
+      <div class="res-box gold-box" id="rboxC">
+        <div class="res-glow-ring"></div>
+        <div class="res-inner">
+          <div class="res-label">First&nbsp;Year<br>CGPA</div>
+          <div class="res-value" id="rvc">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grade table -->
+    <div class="sec-title" style="margin-bottom:16px;">
+      <div class="sec-title-icon" style="width:28px;height:28px;font-size:12px;">≡</div>
+      <span class="sec-title-text" style="font-size:11px;">Grade Breakdown</span>
+      <div class="sec-title-line"></div>
+    </div>
+    <div class="sem-result-box">
+      <h2 class="sem-head">Semester 1 Report</h2>
+      <div class="grade-table-wrap">
+        <table class="grade-table">
+          <thead>
+            <tr>
+              <th>Code</th><th>Subject</th>
+              <th>Marks</th><th>%</th><th>Grade</th><th>GP</th><th>Credits</th><th>Points</th>
+            </tr>
+          </thead>
+          <tbody id="gtbody1"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sem-result-box">
+      <h2 class="sem-head">Semester 2 Report</h2>
+      <div class="grade-table-wrap">
+        <table class="grade-table">
+          <thead>
+            <tr>
+              <th>Code</th><th>Subject</th>
+              <th>Marks</th><th>%</th><th>Grade</th><th>GP</th><th>Credits</th><th>Points</th>
+            </tr>
+          </thead>
+          <tbody id="gtbody2"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="save-wrap">
+      <button class="save-btn" onclick="downloadReport()">
+      📄 GET REPORT CARD
+      </button>
+    </div>
+  </div>
+</section>
+
+</div><!-- /wrap -->
+
+<footer>
+  <em>SGPA &amp; CGPA Calculator</em> &nbsp;·&nbsp; First Year Engineering &nbsp;·&nbsp; Local Report Generator
+</footer>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+/* ─── floating particle canvas ─── */
+(function(){
+  const cv = document.getElementById('bg-canvas');
+  const cx = cv.getContext('2d');
+  let W, H, pts = [];
+  function resize(){ W = cv.width = innerWidth; H = cv.height = innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  for(let i=0;i<60;i++) pts.push({
+    x: Math.random()*2000, y: Math.random()*1200,
+    vx:(Math.random()-.5)*.25, vy:(Math.random()-.5)*.25,
+    r: Math.random()*1.5+.4,
+    a: Math.random()
+  });
+  function draw(){
+    cx.clearRect(0,0,W,H);
+    pts.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+      cx.beginPath();
+      cx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      cx.fillStyle=`rgba(0,229,255,${p.a*.35})`;
+      cx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ─── Subject definitions ─── */
+/*
+  type codes:
+    ACISE  → Attendance(5) + CIE(15) + ISE(20) + ESE(60) = 100  [theory subjects]
+    T+U    → Attd(5)+CIE(15)+ISE(20)+ESE(60) + Tutorial(25) [F001, F002 — split 3cr+1cr]
+    ACL    → Attendance(5) + CIE(20) + Lab(25) = 50  [F020, F021]
+    L      → Lab out of 25
+    F      → Fab/Project out of 50
+*/
+const THEORY_CODES = new Set(["F001","F002","F003","F005","F007","F009","F011","F013","F015","F019"]);
+
+const S = {
+  F001:{name:"Linear Algebra & Calculus",        sh:"LAC",    cr:4,  type:"T+U",   mT:100, mU:25 },
+  F002:{name:"Statistics & Integral Calculus",    sh:"SIC",    cr:4,  type:"T+U",   mT:100, mU:25 },
+  F003:{name:"Quantum Physics",                   sh:"QP",     cr:2,  type:"ACISE", mT:100        },
+  F004:{name:"Quantum Physics Lab",               sh:"QPL",    cr:1,  type:"L",     mT:25         },
+  F005:{name:"Chemical Science & Technology",     sh:"CST",    cr:2,  type:"ACISE", mT:100        },
+  F006:{name:"Chem Sci & Tech Lab",               sh:"CSTL",   cr:1,  type:"L",     mT:25         },
+  F007:{name:"Mechanics For Robotics",            sh:"MFR",    cr:2,  type:"ACISE", mT:100        },
+  F008:{name:"Mechanics For Robotics Lab",        sh:"MFRL",   cr:1,  type:"L",     mT:25         },
+  F009:{name:"Integrated Elec & Electronics Engg",sh:"IEEE",   cr:2,  type:"ACISE", mT:100        },
+  F010:{name:"IEEEL (Lab)",                       sh:"IEEEL",  cr:1,  type:"L",     mT:25         },
+  F011:{name:"Computer Graphics & Design",        sh:"CGD",    cr:2,  type:"ACISE", mT:100        },
+  F012:{name:"Computer Graphics & Design Lab",    sh:"CGDL",   cr:1,  type:"L",     mT:25         },
+  F013:{name:"C Programming for Problem Solving", sh:"CPPS",   cr:2,  type:"ACISE", mT:100        },
+  F014:{name:"C Programming Lab",                 sh:"CPPSL",  cr:1,  type:"L",     mT:25         },
+  F015:{name:"Object Oriented Programming C++",   sh:"OOPC",   cr:2,  type:"ACISE", mT:100        },
+  F016:{name:"OOP C++ Lab",                       sh:"OOPCL",  cr:1,  type:"L",     mT:25         },
+  F017:{name:"Fabrication Lab",                   sh:"FABLAB", cr:1,  type:"F",     mT:50         },
+  F018:{name:"Innovative Ideas & Design Thinking",sh:"IIDTL",  cr:1,  type:"F",     mT:50         },
+  F019:{name:"Environment & Sustainable Engg",    sh:"ESE",    cr:2,  type:"ACISE", mT:100        },
+  F020:{name:"Indian Knowledge System",           sh:"IKS",    cr:2,  type:"ACL",   mT:50         },
+  F021:{name:"Soft Skills",                       sh:"SS",     cr:2,  type:"ACL",   mT:50         },
+  F022:{name:"NPTEL Course",                      sh:"NPTEL",  cr:1,  type:"L",     mT:25         },
+  F023:{name:"Co-Curricular Activity 1 (CCA-1)",  sh:"CCA-1",  cr:1,  type:"L",     mT:25         },
+  F024:{name:"Co-Curricular Activity 2 (CCA-2)",  sh:"CCA-2",  cr:1,  type:"L",     mT:25         },
+};
+
+/* Group → semester course lists */
+const COURSES = {
+  1: {
+    s1: ["F001","F003","F004","F007","F008","F009","F010","F013","F014","F017","F020","F023"],
+    s2: ["F002","F005","F006","F011","F012","F015","F016","F018","F019","F021","F022","F024"]
+  },
+  2: {
+    s1: ["F001","F005","F006","F011","F012","F013","F014","F018","F019","F021","F023"],
+    s2: ["F002","F003","F004","F007","F008","F009","F010","F015","F016","F017","F020","F022","F024"]
+  }
+};
+
+/* ─── Build subject card HTML ─── */
+function buildCard(code, sem) {
+  const s = S[code], id = `${code}_${sem}`;
+  let fields = '';
+
+  if (s.type === 'ACISE') {
+    /* Attendance/5 · CIE/15 · ISE/20 · ESE/60 */
+    fields = `
+      <div class="mf mf-5">
+        <span class="mb mb-5">Attd / 5</span>
+        <input type="number" id="${id}_A" placeholder="0–5"  min="0" max="5"  step="0.01"/>
+      </div>
+      <div class="mf mf-15">
+        <span class="mb mb-15">CIE / 15</span>
+        <input type="number" id="${id}_C" placeholder="0–15" min="0" max="15" step="0.01"/>
+      </div>
+      <div class="mf mf-20">
+        <span class="mb mb-20">ISE / 20</span>
+        <input type="number" id="${id}_I" placeholder="0–20" min="0" max="20" step="0.01"/>
+      </div>
+      <div class="mf mf-60">
+        <span class="mb mb-60">ESE / 60</span>
+        <input type="number" id="${id}_E" placeholder="0–60" min="0" max="60" step="0.01"/>
+      </div>`;
+  } else if (s.type === 'T+U') {
+    /* F001/F002: Attd(5)+CIE(15)+ISE(20)+ESE(60)=100 for 3cr, Tutorial(25) for 1cr */
+    fields = `
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:100%;">
+        <div class="mf mf-5">
+          <span class="mb mb-5">Attd / 5</span>
+          <input type="number" id="${id}_A" placeholder="0–5" min="0" max="5" step="0.01"/>
+        </div>
+        <div class="mf mf-15">
+          <span class="mb mb-15">CIE / 15</span>
+          <input type="number" id="${id}_C" placeholder="0–15" min="0" max="15" step="0.01"/>
+        </div>
+        <div class="mf mf-20">
+          <span class="mb mb-20">ISE / 20</span>
+          <input type="number" id="${id}_I" placeholder="0–20" min="0" max="20" step="0.01"/>
+        </div>
+        <div class="mf mf-60">
+          <span class="mb mb-60">ESE / 60</span>
+          <input type="number" id="${id}_E" placeholder="0–60" min="0" max="60" step="0.01"/>
+        </div>
+      </div>
+      <div style="margin-top:12px;width:100%;">
+        <div class="mf mf-25">
+          <span class="mb mb-25">Tutorial / 25</span>
+          <input type="number" id="${id}_U" placeholder="0–25" min="0" max="25" step="0.01"/>
+        </div>
+      </div>`;
+  } else if (s.type === 'ACL') {
+    /* F020/F021: Attendance(5) + CIE(20) + Lab(25) = 50 */
+    fields = `
+      <div class="mf mf-5">
+        <span class="mb mb-5">Attd / 5</span>
+        <input type="number" id="${id}_A" placeholder="0–5"  min="0" max="5"  step="0.01"/>
+      </div>
+      <div class="mf mf-20">
+        <span class="mb mb-20">CIE / 20</span>
+        <input type="number" id="${id}_C" placeholder="0–20" min="0" max="20" step="0.01"/>
+      </div>
+      <div class="mf mf-25">
+        <span class="mb mb-25">Lab / 25</span>
+        <input type="number" id="${id}_L" placeholder="0–25" min="0" max="25" step="0.01"/>
+      </div>`;
+  } else if (s.type === 'F') {
+    fields = `
+      <div class="mf mf-50">
+        <span class="mb mb-50">Marks / 50</span>
+        <input type="number" id="${id}_T" placeholder="0–50" min="0" max="50" step="0.01"/>
+      </div>`;
+  } else {
+    /* L — lab out of 25 */
+    const mx = s.mT, cls = mx===100 ? 'mf-100' : 'mf-25', bc = mx===100 ? 'mb-100' : 'mb-25';
+    fields = `
+      <div class="mf ${cls}">
+        <span class="mb ${bc}">Marks / ${mx}</span>
+        <input type="number" id="${id}_T" placeholder="0–${mx}" min="0" max="${mx}" step="0.01"/>
+      </div>`;
+  }
+
+  return `
+    <div class="subj-card" id="sc_${id}">
+      <div class="subj-top">
+        <span class="subj-code">${code}</span>
+        <span class="subj-name">${s.name}</span>
+        <span class="subj-cr">${s.cr} cr</span>
+      </div>
+      <div class="marks-row">${fields}</div>
+    </div>`;
+}
+
+/* ─── Render subjects for a specific group ─── */
+let currentGroup = 0;
+
+function renderForGroup(grp) {
+  const s1codes = COURSES[grp].s1;
+  const s2codes = COURSES[grp].s2;
+
+  document.getElementById('sg1').innerHTML = s1codes.map(c => buildCard(c, 1)).join('');
+  document.getElementById('sg2').innerHTML = s2codes.map(c => buildCard(c, 2)).join('');
+
+  /* Reset to sem 1 tab */
+  document.querySelectorAll('.sem-btn').forEach((b,i)  => b.classList.toggle('active', i===0));
+  document.querySelectorAll('.sem-panel').forEach((p,i) => p.classList.toggle('active', i===0));
+}
+
+function onGroupInput(el) {
+  const val = parseInt(el.value.trim());
+  const banner   = document.getElementById('grp-banner');
+  const marksCard = document.getElementById('marks-card');
+  const calcWrap  = document.querySelector('.calc-btn-wrap');
+
+  if (val !== 1 && val !== 2) {
+    /* Invalid — hide everything */
+    banner.innerHTML = '';
+    marksCard.classList.remove('revealed');
+    calcWrap.classList.remove('revealed');
+    currentGroup = 0;
+    return;
+  }
+
+  if (val === currentGroup) return;   /* same group, no re-render needed */
+  currentGroup = val;
+
+  /* Show confirm badge */
+  const semList1 = COURSES[val].s1.join(', ');
+  const semList2 = COURSES[val].s2.join(', ');
+  banner.innerHTML = `
+    <div class="grp-badge">
+      <span class="dot"></span>
+      Group ${val} confirmed &nbsp;—&nbsp; Sem I: ${COURSES[val].s1.length} courses &nbsp;|&nbsp; Sem II: ${COURSES[val].s2.length} courses
+    </div>`;
+
+  /* Rebuild subject cards for this group */
+  renderForGroup(val);
+
+  /* Also reset results */
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('statusMsg').className = 'status';
+
+  /* Reveal marks card + calculate button with staggered animation */
+  marksCard.classList.remove('revealed');
+  calcWrap.classList.remove('revealed');
+  void marksCard.offsetWidth;               /* force reflow so animation re-triggers */
+  marksCard.classList.add('revealed');
+  setTimeout(() => calcWrap.classList.add('revealed'), 80);
+}
+
+/* ─── Semester tab switch ─── */
+function switchSem(n, btn) {
+  document.querySelectorAll('.sem-btn').forEach((b,i) => b.classList.toggle('active', i===n-1));
+  document.querySelectorAll('.sem-panel').forEach((p,i) => p.classList.toggle('active', i===n-1));
+}
+
+/* ─── Grade / GP lookup ─── */
+function gpOf(pct) {
+  if (pct > 90) return {gp:10, gr:'O'};
+  if (pct > 80) return {gp:9,  gr:'A+'};
+  if (pct > 70) return {gp:8,  gr:'A'};
+  if (pct > 60) return {gp:7,  gr:'B+'};
+  if (pct > 50) return {gp:6,  gr:'B'};
+  if (pct > 44) return {gp:5,  gr:'C'};
+  if (pct >= 40) return {gp:4, gr:'P'};
+  return              {gp:0,   gr:'F'};
+}
+
+function gradeCls(gr) {
+  const map = {O:'g-O','A+':'g-Ap',A:'g-A','B+':'g-Bp',B:'g-B','C':'g-C',P:'g-P',F:'g-F'};
+  return map[gr]||'';
+}
+
+/* ─── Read input helper ─── */
+function getv(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  const v = el.value.trim();
+  return v === '' ? null : parseFloat(v);
+}
+
+/* ─── Status helper ─── */
+function status(msg, type) {
+  const el = document.getElementById('statusMsg');
+  el.className = 'status ' + type;
+  el.innerHTML = msg;
+}
+function clearStatus() {
+  const el = document.getElementById('statusMsg');
+  el.className = 'status'; el.innerHTML = '';
+}
+
+/* ─── Process one course; returns array of entry objects or 'missing'/'bounds' ─── */
+function processCode(code, sem) {
+  const s = S[code];
+  const id = `${code}_${sem}`;
+  const card = document.getElementById(`sc_${id}`);
+  if (card) card.classList.remove('failed-card');
+
+  /* ── ACISE: Attendance(5)+CIE(15)+ISE(20)+ESE(60) = 100 ── */
+  if (s.type === 'ACISE') {
+    const vA = getv(`${id}_A`), vC = getv(`${id}_C`);
+    const vI = getv(`${id}_I`), vE = getv(`${id}_E`);
+    if (vA===null||vC===null||vI===null||vE===null) return 'missing';
+    if (vA<0||vA>5)   return 'bounds';
+    if (vC<0||vC>15)  return 'bounds';
+    if (vI<0||vI>20)  return 'bounds';
+    if (vE<0||vE>60)  return 'bounds';
+    const total = vA + vC + vI + vE;          /* out of 100 */
+    const pct   = total;                       /* already percentage */
+    const gp    = gpOf(pct);
+    /* Fail if ESE < 24 OR total < 40 */
+    const fail=(vE<24)||(total<40);
+    if (fail && card) card.classList.add('failed-card');
+    return [{ code, sem, label: s.name,
+              raw: `${total}`, outOf: 100,
+              pct, credits: fail?0:s.cr, ...(fail?{gp:0,gr:"F"}:gp), fail,
+              eseVal: vE }];
+  }
+
+  /* ── T+U: F001/F002 — Attd(5)+CIE(15)+ISE(20)+ESE(60)=100 → 3cr, Tutorial(25) → 1cr ── */
+  if (s.type === 'T+U') {
+    const vA = getv(`${id}_A`), vC = getv(`${id}_C`);
+    const vI = getv(`${id}_I`), vE = getv(`${id}_E`);
+    const vU = getv(`${id}_U`);
+
+    if (vA===null||vC===null||vI===null||vE===null||vU===null) return 'missing';
+    if (vA<0||vA>5)   return 'bounds';
+    if (vC<0||vC>15)  return 'bounds';
+    if (vI<0||vI>20)  return 'bounds';
+    if (vE<0||vE>60)  return 'bounds';
+    if (vU<0||vU>25)  return 'bounds';
+
+    const theoryTotal = vA + vC + vI + vE;  /* out of 100 */
+    const pT = theoryTotal;                 /* already percentage */
+    const pU = (vU/25)*100;
+
+    const gpT = gpOf(pT), gpU = gpOf(pU);
+
+    /* Fail theory if ESE < 24 OR total theory marks < 40 */
+    const failT = (vE < 24) || (theoryTotal < 40);
+
+    /* Tutorial has no ESE, so fail if marks < 40% */
+    const failU = pU < 40;
+
+    if ((failT||failU) && card) card.classList.add('failed-card');
+
+    return [
+      { code, sem, label: s.name+' (Theory)',   raw:`${theoryTotal}`, outOf:100, pct:pT, credits:failT?0:3, ...(failT?{gp:0,gr:"F"}:gpT), fail:failT, eseVal:vE },
+      { code, sem, label: s.name+' (Tutorial)', raw:`${vU}`,                  outOf:25,  pct:pU, credits:failU?0:1, ...(failU?{gp:0,gr:"F"}:gpU), fail:failU }
+    ];
+  }
+
+  /* ── ACL: F020/F021 — Attendance(5)+CIE(20)+Lab(25) = 50 ── */
+  if (s.type === 'ACL') {
+    const vA = getv(`${id}_A`), vC = getv(`${id}_C`), vL = getv(`${id}_L`);
+    if (vA===null||vC===null||vL===null) return 'missing';
+    if (vA<0||vA>5)   return 'bounds';
+    if (vC<0||vC>20)  return 'bounds';
+    if (vL<0||vL>25)  return 'bounds';
+    const total = vA + vC + vL;              /* out of 50 */
+    const pct   = (total / 50) * 100;
+    const gp    = gpOf(pct);
+    const fail  = pct < 40;
+    if (fail && card) card.classList.add('failed-card');
+    return [{ code, sem, label: s.name,
+              raw: `${total}`, outOf: 50,
+              pct, credits: fail?0:s.cr, ...(fail?{gp:0,gr:"F"}:gp), fail }];
+  }
+
+  /* ── L / F: single input ── */
+  const vT = getv(`${id}_T`);
+  if (vT===null) return 'missing';
+  const mx  = s.mT;
+  if (vT<0||vT>mx) return 'bounds';
+  const pct = (vT / mx) * 100;
+  const gp  = gpOf(pct);
+  const fail= pct < 40;
+  if (fail && card) card.classList.add('failed-card');
+  return [{ code, sem, label: s.name, raw:`${vT}`, outOf:mx, pct, credits:s.cr, ...gp, fail }];
+}
+
+/* ─── Main calculate ─── */
+let lastCalc = null;
+
+function calculate() {
+  clearStatus();
+  if(!currentGroup) return;
+  
+  const grp = currentGroup;
+  const s1codes = COURSES[grp].s1;
+  const s2codes = COURSES[grp].s2;
+  
+  const selectedOption = document.getElementById('calc-option-select').value;
+  
+  let missingCount = 0;
+  let boundsHit = false;
+  
+  let e1 = [], e2 = [];
+  function collect(codes, sem, arr) {
+    for (const code of codes) {
+      const res = processCode(code, sem);
+      if (res === 'missing') missingCount++;
+      else if (res === 'bounds') boundsHit = true;
+      else arr.push(...res);
+    }
+  }
+
+  // Check inputs selectively based on chosen configuration 
+  if (selectedOption === 'sem1' || selectedOption === 'fy_cgpa') {
+    collect(s1codes, 1, e1);
+  }
+  if (selectedOption === 'sem2' || selectedOption === 'fy_cgpa') {
+    collect(s2codes, 2, e2);
+  }
+  
+  if (missingCount > 0) {
+    status('✗ &nbsp;Please fill in ALL marks for the chosen option before calculating. Missing: ' + missingCount + ' field(s).', 'error');
+    return;
+  }
+  if (boundsHit) {
+    status('✗ &nbsp;Some marks are out of bounds. Please check and correct.', 'error');
+    return;
+  }
+  
+  const fail1 = e1.filter(e => e.fail);
+  const fail2 = e2.filter(e => e.fail);
+  
+  let sgpa1 = null, sgpa2 = null, cgpa = null;
+  let failMsg = '';
+
+  // Logic processing based on selection options
+  if (selectedOption === 'sem1') {
+    if (fail1.length > 0) {
+      failMsg += `✗ Sem 1 SGPA cannot be computed — Failed in: <strong>${failDetail(fail1)}</strong>.<br>`;
+    } else {
+      const tp = e1.reduce((a,e) => a + e.gp*e.credits, 0);
+      const tc = e1.reduce((a,e) => a + e.credits, 0);
+      sgpa1 = (tp/tc).toFixed(2);
+    }
+  }
+  
+  if (selectedOption === 'sem2') {
+    if (fail2.length > 0) {
+      failMsg += `✗ Sem 2 SGPA cannot be computed — Failed in: <strong>${failDetail(fail2)}</strong>.<br>`;
+    } else {
+      const tp = e2.reduce((a,e) => a + e.gp*e.credits, 0);
+      const tc = e2.reduce((a,e) => a + e.credits, 0);
+      sgpa2 = (tp/tc).toFixed(2);
+    }
+  }
+  
+  if (selectedOption === 'fy_cgpa') {
+    if (fail1.length > 0) failMsg += `✗ Sem 1 SGPA cannot be computed — Failed in: <strong>${failDetail(fail1)}</strong>.<br>`;
+    if (fail2.length > 0) failMsg += `✗ Sem 2 SGPA cannot be computed — Failed in: <strong>${failDetail(fail2)}</strong>.<br>`;
+    
+    if (!failMsg) {
+      const tp1 = e1.reduce((a,e) => a + e.gp*e.credits, 0);
+      const tc1 = e1.reduce((a,e) => a + e.credits, 0);
+      const tp2 = e2.reduce((a,e) => a + e.gp*e.credits, 0);
+      const tc2 = e2.reduce((a,e) => a + e.credits, 0);
+      sgpa1 = (tp1/tc1).toFixed(2);
+      sgpa2 = (tp2/tc2).toFixed(2);
+      cgpa = (((tp1/tc1) + (tp2/tc2)) / 2).toFixed(2); 
+    }
+  }
+
+  // Render Display 
+  document.getElementById('rv1').innerText = sgpa1 || '—';
+  document.getElementById('rv2').innerText = sgpa2 || '—';
+  document.getElementById('rvc').innerText = cgpa || '—';
+
+  const tb1 = document.getElementById('gtbody1');
+  const tb2 = document.getElementById('gtbody2');
+  tb1.innerHTML = ''; tb2.innerHTML = '';
+  
+  // Conditionally display result boxes depending on selection configuration
+  document.getElementById('rbox1').style.display = (selectedOption === 'sem1' || selectedOption === 'fy_cgpa') ? 'block' : 'none';
+  document.getElementById('rbox2').style.display = (selectedOption === 'sem2' || selectedOption === 'fy_cgpa') ? 'block' : 'none';
+  document.getElementById('rboxC').style.display = (selectedOption === 'fy_cgpa') ? 'block' : 'none';
+  
+  tb1.closest('.sem-result-box').style.display = (selectedOption === 'sem1' || selectedOption === 'fy_cgpa') ? 'block' : 'none';
+  tb2.closest('.sem-result-box').style.display = (selectedOption === 'sem2' || selectedOption === 'fy_cgpa') ? 'block' : 'none';
+
+  e1.concat(e2).forEach(e => {
+    const gcls = gradeCls(e.gr);
+    const target = e.sem === 1 ? tb1 : tb2;
+    target.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td class="code-cell">${e.code}</td>
+        <td>${e.label}</td>
+        <td style="font-family:'JetBrains Mono',monospace;">${e.raw} / ${e.outOf}</td>
+        <td style="font-family:'JetBrains Mono',monospace;">${e.pct.toFixed(1)}%</td>
+        <td><span class="grade-pill ${gcls}">${e.gr}</span></td>
+        <td class="gp-cell" style="color:${e.gp===0?'var(--red)':'var(--text)'}">${e.gp}</td>
+        <td style="text-align:center">${e.credits}</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-weight:700;">${e.gp*e.credits}</td>
+      </tr>`);
+  });
+
+  if (failMsg) {
+    document.getElementById('results-section').style.display = 'block';
+    status(failMsg, 'error');
+  } else {
+    let outString = '✓ &nbsp;Calculation successful. ';
+    if(sgpa1) outString += `SGPA1 = ${sgpa1} &nbsp;|&nbsp; `;
+    if(sgpa2) outString += `SGPA2 = ${sgpa2} &nbsp;|&nbsp; `;
+    if(cgpa) outString += `CGPA = ${cgpa}`;
+    status(outString, 'success');
+    const resultSection = document.getElementById('results-section');
+
+    resultSection.style.display = 'block';
+    document.getElementById("metaName").textContent =
+    document.getElementById("iName").value;
+
+    document.getElementById("metaRoll").textContent =
+    document.getElementById("iRoll").value;
+
+    document.getElementById("metaGroup").textContent =
+    document.getElementById("iGroup").value;
+    resultSection.classList.add('revealed');
+    
+    const option = document.getElementById("calc-option-select").value;
+    const trio = document.querySelector(".results-trio");
+    trio.classList.remove("single");
+
+    if(option==="sem1"||option==="sem2"){
+        trio.classList.add("single");
+    }
+    resultSection.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
+    });
+  }
+}
+
+/* ─── Get PDF ─── */
+function downloadReport() {
+  if (
+    document.getElementById("rv1").textContent === "—" &&
+    document.getElementById("rv2").textContent === "—" &&
+    document.getElementById("rvc").textContent === "—"
+  ) {
+    alert("Calculate first");
+    return;
+  }
+
+  window.print();
+}
+</script>
+</body>
+</html>
