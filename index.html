@@ -1014,6 +1014,121 @@ footer em { color: var(--c1d); font-style: normal; }
 ::-webkit-scrollbar-track { background: var(--deep); }
 ::-webkit-scrollbar-thumb { background: rgba(0,229,255,.2); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(0,229,255,.4); }
+
+/* ═════════ UNIVERSAL FIT-TO-SCREEN FIX ═════════ */
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.wrap {
+  width: min(100% - 24px, 1160px);
+  max-width: 1160px;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* All big containers stay inside screen */
+.card,
+.grading-container,
+#marks-card,
+.subj-card,
+.grading-table-card,
+.platform-notice-card,
+.sem-result-box {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Subject cards auto-fit according to screen */
+.subj-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: 16px;
+}
+
+/* Input rows wrap properly */
+.marks-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.mf,
+.mf input {
+  min-width: 0;
+  width: 100%;
+}
+
+/* F001/F002 inline grid also becomes responsive */
+.subj-card div[style*="grid-template-columns:repeat(4,1fr)"] {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+}
+
+/* Long text never breaks layout */
+.subj-name,
+.meta-value,
+.platform-notice-card,
+td,
+th {
+  overflow-wrap: anywhere;
+}
+
+/* Tables scroll instead of breaking screen */
+.policy-table-wrapper,
+.grade-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Phone and small screens */
+@media (max-width: 700px) {
+
+  .wrap {
+    width: calc(100% - 20px);
+  }
+
+  .card,
+  .grading-container,
+  #marks-card {
+    padding: 22px 14px;
+  }
+
+  .identity-grid,
+  .report-meta,
+  .results-trio,
+  .results-trio.single {
+    grid-template-columns: 1fr !important;
+  }
+
+  .sem-nav {
+    flex-direction: column;
+  }
+
+  .sem-btn:first-child {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sec-title-text {
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+
+  .hdr-sub {
+    font-size: 10px;
+    letter-spacing: 3px;
+    line-height: 1.8;
+  }
+
+  .policy-table,
+  .grade-table {
+    min-width: 620px;
+  }
+}
 </style>
 </head>
 <body>
