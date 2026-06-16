@@ -1742,14 +1742,36 @@ function processCode(code, sem) {
     ];
   }
 
-  /* ── ACL: F020/F021 — Attendance(5)+CIE(20)+Lab(25) = 50 ── */
+  // ── ACL: F020/F021 — Attendance(5)+CIE(20)+Lab(25) = 50 ──
   if (s.type === 'ACL') {
     const vA = getv(`${id}_A`), vC = getv(`${id}_C`), vL = getv(`${id}_L`);
     if (vA===null||vC===null||vL===null) return 'missing';
     if (vA<0||vA>5)   return 'bounds';
     if (vC<0||vC>20)  return 'bounds';
     if (vL<0||vL>25)  return 'bounds';
-    const total = vA + vC + vL;              /* out of 50 */
+
+    // ★ Special handling for F021: split into Theory (1 cr) and Lab (1 cr)
+    if (code === 'F021') {
+      const theoryTotal = vA + vC;
+      const theoryPct = (theoryTotal / 25) * 100;
+      const theoryGp = gpOf(theoryPct);
+      const theoryFail = theoryPct < 40;
+
+      const labTotal = vL;
+      const labPct = (labTotal / 25) * 100;
+      const labGp = gpOf(labPct);
+      const labFail = labPct < 40;
+
+      if ((theoryFail || labFail) && card) card.classList.add('failed-card');
+
+      return [
+        { code, sem, label: s.name + ' (Theory)', raw: `${theoryTotal}`, outOf: 25, pct: theoryPct, credits: theoryFail ? 0 : 1, ...(theoryFail ? {gp:0, gr:"F"} : theoryGp), fail: theoryFail },
+        { code, sem, label: s.name + ' (Lab)', raw: `${labTotal}`, outOf: 25, pct: labPct, credits: labFail ? 0 : 1, ...(labFail ? {gp:0, gr:"F"} : labGp), fail: labFail }
+      ];
+    }
+
+    // Original ACL handling for other courses (F020 etc.)
+    const total = vA + vC + vL;
     const pct   = (total / 50) * 100;
     const gp    = gpOf(pct);
     const fail  = pct < 40;
